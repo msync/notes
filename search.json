@@ -1,0 +1,16 @@
+[
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About",
+    "section": "",
+    "text": "Study notes for quick access from anywhere."
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Sync’ing Memory to Notes",
+    "section": "",
+    "text": "Created using Quarto. Check out https://quarto.org/docs/websites."
+  }
+]
