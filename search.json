@@ -7,6 +7,13 @@
     "text": "Study notes for quick access from anywhere."
   },
   {
+    "objectID": "nn/index.html",
+    "href": "nn/index.html",
+    "title": "Building Blocks of the Deep Learning Model",
+    "section": "",
+    "text": "The Perceptron\nThere has to be enough stimulus to trigger the neuron. That is a function of what comes in (the input signals, scaled by the weights), and the bias which is inherent to each neuron. Biological neurons have a threshold, and if the stimulus is above that threshold, the neuron fires.\n\\[ y = f(\\sum_{i=1}^{n} w_i x_i + b) \\]\n\n\nCode\nimport random\nimport numpy as np\nimport matplotlib.pyplot as plt\n\nfrom micrograd.engine import Value\nfrom micrograd.nn import Neuron\nfrom sklearn.datasets import make_moons\n\nnp.random.seed(1337)\nrandom.seed(1337)\n\n\n\nX, y = make_moons(n_samples=100, noise=0.1)\n\ny = y*2 - 1\nplt.figure(figsize=(5,5))\nplt.scatter(X[:,0], X[:,1], c=y, cmap='coolwarm')"
+  },
+  {
     "objectID": "index.html",
     "href": "index.html",
     "title": "Sync’ing Memory to Notes",
