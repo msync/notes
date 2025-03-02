@@ -176,11 +176,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
+<p>This note is nothing but some commentary added on Karpathy’s <a href="https://github.com/karpathy/micrograd">micrograd</a> example.</p>
 <section id="the-perceptrons-layers-and-networks" class="level1">
 <h1>The Perceptrons, Layers, and Networks</h1>
 <p>It’s signal in, and signal out. The transformation function is the key - it can literally be anything. Intuitively, modeling based on our understanding of the neuron, a simpler function is a good choice. But we do not choose linear functions as they can not model complex relationships.</p>
 <p>Stacking multiple of them leads to obviously interesting complex functions. But we do not know the parameters of this large function that the entire network represents. We need to learn them.</p>
-<div id="badd1df5" class="cell" data-execution_count="1">
+<div id="5b29893a" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> random</span>
@@ -188,14 +189,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> micrograd.engine <span class="im">import</span> Value</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> micrograd.nn <span class="im">import</span> Neuron</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> micrograd.nn <span class="im">import</span> Neuron, Layer, MLP</span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.datasets <span class="im">import</span> make_moons</span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">1337</span>)</span>
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>random.seed(<span class="dv">1337</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div id="5a606bf2" class="cell" data-execution_count="2">
+<div id="75b8b3fe" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>X, y <span class="op">=</span> make_moons(n_samples<span class="op">=</span><span class="dv">100</span>, noise<span class="op">=</span><span class="fl">0.1</span>)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> y<span class="op">*</span><span class="dv">2</span> <span class="op">-</span> <span class="dv">1</span></span>
@@ -214,18 +215,201 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="generalization" class="level2">
 <h2 class="anchored" data-anchor-id="generalization">Generalization</h2>
 <p>The promise of the neural network is, like the brain, to generalize. That is, to be able to predict the class of a point that it has never seen before. This is the key to the success of neural networks.</p>
-<p>So, we imagine that the solution is a function that can, given any point in this 2D space, choose a “side.” This side is the class that the point belongs to. So, a curve that can somehoe separate the two classes is what we are looking for.</p>
+<p>So, we imagine that the solution is a function that can, given any point in this 2D space, choose a “side.” This side is the class that the point belongs to. So, a curve that can somehow separate the two classes is what we are looking for.</p>
 <p>As we have stated before (without any formal proof), a network of stacked perceptrons can model any function. So, let’s model this conjectured function with a network of perceptrons.</p>
 </section>
 </section>
 <section id="the-multi-layer-perceptron" class="level1">
 <h1>The Multi-Layer Perceptron</h1>
 <p>Science and engineering make progress with any or all of abstractions, simplifications and generalizations. The perceptron is a simplification of the neuron. The multi-layer perceptron is a generalization of the perceptron, and a simplification of the brain.</p>
-<div id="8fe00739" class="cell" data-execution_count="3">
+<div id="db9e0bd1" class="cell" data-execution_count="3">
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
 <p><img src="index_files/figure-html/cell-4-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Let’s attempt to solve this classification problem with a model that takes two inputs (the x and y coordinates of the point) and outputs a single value. This value will be the class of the point. We will use a multi-layer perceptron with 2 hidden layers, each with 16 neurons.</p>
+<div id="ac0fe0fb" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> MLP(<span class="dv">2</span>, [<span class="dv">16</span>, <span class="dv">16</span>, <span class="dv">1</span>])</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Number of parameters in the model is"</span>, <span class="bu">len</span>(model.parameters()))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Number of parameters in the model is 337</code></pre>
+</div>
+</div>
+<p>To train this network, we use our trusty friend - calculus, trying to minimize the error between the predicted class and the actual class. Because reducing the error means the network does what we want it to do, and calculus is great at helping us find minima or maxima by way of slopes.</p>
+<p>Ah - the slope. The slope of the error function with respect to the parameters of the network. This is the key to training the network. We can use the slope to adjust the parameters in the right direction, so that the error decreases.</p>
+<p>Which means we represent the network’s computation in terms of the delta between the wanted value and the actual value, and then use calculus to find the slope of the error function with respect to the parameters of the network. And adjust the parameters in such a way as to reduce the error.</p>
+<div id="b261ad2a" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> loss(batch_size<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> batch_size <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>        Xb, yb <span class="op">=</span> X, y</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>        ri <span class="op">=</span> np.random.permutation(X.shape[<span class="dv">0</span>])[:batch_size]</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>        Xb, yb <span class="op">=</span> X[ri], y[ri]</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    inputs <span class="op">=</span> [<span class="bu">list</span>(<span class="bu">map</span>(Value, xrow)) <span class="cf">for</span> xrow <span class="kw">in</span> Xb]</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    scores <span class="op">=</span> <span class="bu">list</span>(<span class="bu">map</span>(model, inputs))</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    losses <span class="op">=</span> [(<span class="dv">1</span> <span class="op">+</span> <span class="op">-</span>yi<span class="op">*</span>scorei).relu() <span class="cf">for</span> yi, scorei <span class="kw">in</span> <span class="bu">zip</span>(yb, scores)]</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    data_loss <span class="op">=</span> <span class="bu">sum</span>(losses) <span class="op">*</span> (<span class="fl">1.0</span> <span class="op">/</span> <span class="bu">len</span>(losses))</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    alpha <span class="op">=</span> <span class="fl">1e-4</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    reg_loss <span class="op">=</span> alpha <span class="op">*</span> <span class="bu">sum</span>((p<span class="op">*</span>p <span class="cf">for</span> p <span class="kw">in</span> model.parameters()))</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    total_loss <span class="op">=</span> data_loss <span class="op">+</span> reg_loss</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    accuracy <span class="op">=</span> [(yi <span class="op">&gt;</span> <span class="dv">0</span>) <span class="op">==</span> (scorei.data <span class="op">&gt;</span> <span class="dv">0</span>) <span class="cf">for</span> yi, scorei <span class="kw">in</span> <span class="bu">zip</span>(yb, scores)]</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> total_loss, <span class="bu">sum</span>(accuracy) <span class="op">/</span> <span class="bu">len</span>(accuracy)</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>total_loss, acc <span class="op">=</span> loss()</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(total_loss, acc)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Value(data=0.8958441028683222, grad=0) 0.5</code></pre>
+</div>
+</div>
+<p>Now, let’s let loose our optimization algorithm. Run the network through the input a 100 times, and adjust the parameters each time to reduce the error. And see where we land.</p>
+<div id="4cad15dd" class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> k <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">100</span>):</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    total_loss, acc <span class="op">=</span> loss()</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    model.zero_grad()</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    total_loss.backward()</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    learning_rate <span class="op">=</span> <span class="fl">1.0</span> <span class="op">-</span> <span class="fl">0.9</span><span class="op">*</span>k<span class="op">/</span><span class="dv">100</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> p <span class="kw">in</span> model.parameters():</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>        p.data <span class="op">-=</span> learning_rate <span class="op">*</span> p.grad</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> k <span class="op">%</span> <span class="dv">1</span> <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"step </span><span class="sc">{</span>k<span class="sc">}</span><span class="ss"> loss </span><span class="sc">{</span>total_loss<span class="sc">.</span>data<span class="sc">}</span><span class="ss">, accuracy </span><span class="sc">{</span>acc<span class="op">*</span><span class="dv">100</span><span class="sc">}</span><span class="ss">%"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>step 0 loss 0.8958441028683222, accuracy 50.0%
+step 1 loss 1.723590533697202, accuracy 81.0%
+step 2 loss 0.7429006313851131, accuracy 77.0%
+step 3 loss 0.7705641260584201, accuracy 82.0%
+step 4 loss 0.3692793385976537, accuracy 84.0%
+step 5 loss 0.31354548191852194, accuracy 86.0%
+step 6 loss 0.2814234349772434, accuracy 89.0%
+step 7 loss 0.2688873331398391, accuracy 91.0%
+step 8 loss 0.2567147286057417, accuracy 91.0%
+step 9 loss 0.27048625516379227, accuracy 91.0%
+step 10 loss 0.2450702385365804, accuracy 91.0%
+step 11 loss 0.25099055297915046, accuracy 92.0%
+step 12 loss 0.21560951851922946, accuracy 91.0%
+step 13 loss 0.2309037844640274, accuracy 93.0%
+step 14 loss 0.20152151227899434, accuracy 92.0%
+step 15 loss 0.2257450627928223, accuracy 93.0%
+step 16 loss 0.19447987596204097, accuracy 92.0%
+step 17 loss 0.21089496199246366, accuracy 93.0%
+step 18 loss 0.159830773563036, accuracy 94.0%
+step 19 loss 0.18453748746883922, accuracy 93.0%
+step 20 loss 0.18977522856087634, accuracy 91.0%
+step 21 loss 0.19072704042579647, accuracy 93.0%
+step 22 loss 0.11733695088756484, accuracy 97.0%
+step 23 loss 0.12173524408232456, accuracy 95.0%
+step 24 loss 0.1261571261277045, accuracy 95.0%
+step 25 loss 0.16049097780801674, accuracy 95.0%
+step 26 loss 0.18747197705245813, accuracy 92.0%
+step 27 loss 0.16741837891059408, accuracy 95.0%
+step 28 loss 0.09586583491455397, accuracy 97.0%
+step 29 loss 0.08778783707420913, accuracy 96.0%
+step 30 loss 0.11731297569011852, accuracy 95.0%
+step 31 loss 0.09340146460619837, accuracy 97.0%
+step 32 loss 0.12454454903103453, accuracy 95.0%
+step 33 loss 0.0798400265277727, accuracy 97.0%
+step 34 loss 0.07727519232921674, accuracy 97.0%
+step 35 loss 0.0766125014309447, accuracy 98.0%
+step 36 loss 0.1061049237919837, accuracy 96.0%
+step 37 loss 0.09062808429265971, accuracy 99.0%
+step 38 loss 0.10671887043036932, accuracy 95.0%
+step 39 loss 0.05225659921975848, accuracy 98.0%
+step 40 loss 0.060160098952344594, accuracy 100.0%
+step 41 loss 0.08596724533333948, accuracy 96.0%
+step 42 loss 0.051121079431795995, accuracy 99.0%
+step 43 loss 0.0524014240164283, accuracy 97.0%
+step 44 loss 0.04530684179001565, accuracy 100.0%
+step 45 loss 0.07211073370655101, accuracy 97.0%
+step 46 loss 0.033342386513102326, accuracy 99.0%
+step 47 loss 0.03143222795751124, accuracy 100.0%
+step 48 loss 0.03658536747111511, accuracy 99.0%
+step 49 loss 0.04829139382390296, accuracy 99.0%
+step 50 loss 0.09875114765619633, accuracy 96.0%
+step 51 loss 0.05449063965875454, accuracy 99.0%
+step 52 loss 0.033926794357083, accuracy 100.0%
+step 53 loss 0.05261517263568444, accuracy 97.0%
+step 54 loss 0.03250295251424926, accuracy 99.0%
+step 55 loss 0.02888327387207818, accuracy 100.0%
+step 56 loss 0.04139151104027242, accuracy 98.0%
+step 57 loss 0.018987407426128484, accuracy 100.0%
+step 58 loss 0.025238335238837423, accuracy 100.0%
+step 59 loss 0.02079656521341891, accuracy 100.0%
+step 60 loss 0.032597111578102314, accuracy 99.0%
+step 61 loss 0.017863351693480294, accuracy 100.0%
+step 62 loss 0.02300871783221171, accuracy 100.0%
+step 63 loss 0.02207932546358147, accuracy 100.0%
+step 64 loss 0.029432917853529708, accuracy 99.0%
+step 65 loss 0.016251514644091938, accuracy 100.0%
+step 66 loss 0.028468534483264474, accuracy 99.0%
+step 67 loss 0.013994365546208738, accuracy 100.0%
+step 68 loss 0.015552344843651433, accuracy 100.0%
+step 69 loss 0.03389119946160169, accuracy 99.0%
+step 70 loss 0.014229870065926931, accuracy 100.0%
+step 71 loss 0.013255281583285506, accuracy 100.0%
+step 72 loss 0.012300277590022075, accuracy 100.0%
+step 73 loss 0.012676052498355959, accuracy 100.0%
+step 74 loss 0.02059381195595477, accuracy 100.0%
+step 75 loss 0.011845398205364437, accuracy 100.0%
+step 76 loss 0.01601269747288306, accuracy 100.0%
+step 77 loss 0.02545836023922212, accuracy 100.0%
+step 78 loss 0.014382930289661897, accuracy 100.0%
+step 79 loss 0.011698962425817982, accuracy 100.0%
+step 80 loss 0.012318500800515782, accuracy 100.0%
+step 81 loss 0.014121117031464236, accuracy 100.0%
+step 82 loss 0.011664591962446229, accuracy 100.0%
+step 83 loss 0.011589314549188734, accuracy 100.0%
+step 84 loss 0.010990299347735225, accuracy 100.0%
+step 85 loss 0.01098922672069161, accuracy 100.0%
+step 86 loss 0.010988193757655071, accuracy 100.0%
+step 87 loss 0.010987200447388705, accuracy 100.0%
+step 88 loss 0.010986246779084925, accuracy 100.0%
+step 89 loss 0.010985332742365276, accuracy 100.0%
+step 90 loss 0.010984458327280174, accuracy 100.0%
+step 91 loss 0.010983623524308862, accuracy 100.0%
+step 92 loss 0.010982828324359073, accuracy 100.0%
+step 93 loss 0.010982072718767001, accuracy 100.0%
+step 94 loss 0.010981356699297042, accuracy 100.0%
+step 95 loss 0.010980680258141723, accuracy 100.0%
+step 96 loss 0.010980043387921506, accuracy 100.0%
+step 97 loss 0.010979446081684675, accuracy 100.0%
+step 98 loss 0.010978888332907229, accuracy 100.0%
+step 99 loss 0.010978370135492719, accuracy 100.0%</code></pre>
+</div>
+</div>
+<p>Wow, looks like it wasn’t hard at all! The network learnt pretty quickly and the accuracy moved to 100% pretty early on.</p>
+<p>Let’s visualize the decision boundary of the network.</p>
+<div id="e15c9cc2" class="cell" data-execution_count="7">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>h <span class="op">=</span> <span class="fl">0.25</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>x_min, x_max <span class="op">=</span> X[:, <span class="dv">0</span>].<span class="bu">min</span>() <span class="op">-</span> <span class="dv">1</span>, X[:, <span class="dv">0</span>].<span class="bu">max</span>() <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>y_min, y_max <span class="op">=</span> X[:, <span class="dv">1</span>].<span class="bu">min</span>() <span class="op">-</span> <span class="dv">1</span>, X[:, <span class="dv">1</span>].<span class="bu">max</span>() <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>xx, yy <span class="op">=</span> np.meshgrid(np.arange(x_min, x_max, h), np.arange(y_min, y_max, h))</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>Xmesh <span class="op">=</span> np.c_[xx.ravel(), yy.ravel()]</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>inputs <span class="op">=</span> [<span class="bu">list</span>(<span class="bu">map</span>(Value, xrow)) <span class="cf">for</span> xrow <span class="kw">in</span> Xmesh]</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>scores <span class="op">=</span> <span class="bu">list</span>(<span class="bu">map</span>(model, inputs))</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>Z <span class="op">=</span> np.array([s.data <span class="op">&gt;</span> <span class="dv">0</span> <span class="cf">for</span> s <span class="kw">in</span> scores])</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>Z <span class="op">=</span> Z.reshape(xx.shape)</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> plt.figure()</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>plt.contourf(xx, yy, Z, cmap<span class="op">=</span>plt.cm.Spectral, alpha<span class="op">=</span><span class="fl">0.8</span>)</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>plt.scatter(X[:, <span class="dv">0</span>], X[:, <span class="dv">1</span>], c<span class="op">=</span>y, s<span class="op">=</span><span class="dv">40</span>, cmap<span class="op">=</span>plt.cm.Spectral)</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>plt.xlim(xx.<span class="bu">min</span>(), yy.<span class="bu">max</span>())</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>plt.ylim(yy.<span class="bu">min</span>(), yy.<span class="bu">max</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/cell-8-output-1.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
